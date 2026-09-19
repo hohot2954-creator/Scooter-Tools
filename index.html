@@ -11,7 +11,6 @@
             --bg-color: #0d1117;
             --card-bg: #161b22;
             --accent: #238636;
-            --accent-hover: #2ea043;
             --blue: #58a6ff;
             --text-main: #c9d1d9;
             --text-muted: #8b949e;
@@ -40,10 +39,18 @@
             color: var(--blue);
         }
 
-        p.subtitle {
-            margin: 5px 0 0 0;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+        .btn-nav {
+            display: block;
+            width: 100%;
+            background-color: #1f6feb;
+            color: white;
+            text-align: center;
+            padding: 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-sizing: border-box;
         }
 
         .card {
@@ -97,18 +104,6 @@
             margin-top: 10px;
         }
 
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        button.btn-blue {
-            background-color: #1f6feb;
-        }
-
-        button.btn-blue:hover {
-            background-color: #388bfd;
-        }
-
         .result-box {
             background-color: #0d1117;
             border-left: 4px solid var(--blue);
@@ -124,26 +119,9 @@
             font-size: 0.9rem;
         }
 
-        .result-item:last-child {
-            margin-bottom: 0;
-        }
-
         .result-value {
             font-weight: bold;
             color: var(--blue);
-        }
-
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            background-color: #f85149;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-
-        .status-dot.online {
-            background-color: #3fb950;
         }
     </style>
 </head>
@@ -151,55 +129,38 @@
 
     <header>
         <h1>⚡ Scooter Custom Utility</h1>
-        <p class="subtitle">Calculateurs & Module Bluetooth</p>
     </header>
 
-    <!-- MODULE BLUETOOTH -->
-    <div class="card">
-        <h2>📶 Connexion Bluetooth Trottinette</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">
-            Connecte ta trottinette (Xiaomi, Ninebot ou contrôleur BLE) pour lire les données en direct.
-        </p>
-        <div class="result-item" style="margin-bottom:10px;">
-            <span>Statut :</span>
-            <span><span class="status-dot" id="btDot"></span><strong id="btStatus">Déconnecté</strong></span>
-        </div>
-        <button class="btn-blue" onclick="connectBluetooth()">🔍 Rechercher & Connecter BLE</button>
+    <!-- BOUTON VERS LA PAGE BLUETOOTH -->
+    <a href="bluetooth.html" class="btn-nav">📶 Ouvrir le Scanner Bluetooth</a>
 
-        <div class="result-box" id="btResults" style="display:none;">
-            <div class="result-item"><span>Nom de l'appareil :</span><span class="result-value" id="btDeviceName">-</span></div>
-            <div class="result-item"><span>ID Appareil :</span><span class="result-value" id="btDeviceId">-</span></div>
-            <div class="result-item"><span>Signal / Connexion :</span><span class="result-value" style="color:#3fb950;">Actif</span></div>
-        </div>
-    </div>
-
-    <!-- CALCULATEUR DE BATTERIE -->
+    <!-- CALCULATEUR BATTERIE -->
     <div class="card">
         <h2>🔋 Analyse & Config Batterie</h2>
         <div class="form-group">
             <label for="series">Nombre de séries (S) :</label>
-            <input type="number" id="series" value="13" placeholder="ex: 13 pour 48V, 16 pour 60V">
+            <input type="number" id="series" value="13">
         </div>
         <div class="form-group">
             <label for="parallel">Nombre de parallèles (P) :</label>
-            <input type="number" id="parallel" value="4" placeholder="ex: 4">
+            <input type="number" id="parallel" value="4">
         </div>
         <div class="form-group">
             <label for="cellCap">Capacité d'une cellule (mAh) :</label>
-            <input type="number" id="cellCap" value="2500" placeholder="ex: 2500 ou 3000">
+            <input type="number" id="cellCap" value="2500">
         </div>
         <button onclick="calculateBattery()">Calculer les specs batterie</button>
 
         <div class="result-box" id="batResults" style="display:none;">
             <div class="result-item"><span>Tension Nominale :</span><span class="result-value" id="resNominal">0 V</span></div>
             <div class="result-item"><span>Tension Max (100%) :</span><span class="result-value" id="resMax">0 V</span></div>
-            <div class="result-item"><span>Coupure BMS (Cutoff) :</span><span class="result-value" id="resCutoff">0 V</span></div>
+            <div class="result-item"><span>Coupure BMS :</span><span class="result-value" id="resCutoff">0 V</span></div>
             <div class="result-item"><span>Capacité Totale :</span><span class="result-value" id="resCap">0 Ah</span></div>
             <div class="result-item"><span>Énergie Totale :</span><span class="result-value" id="resWh">0 Wh</span></div>
         </div>
     </div>
 
-    <!-- CALCULATEUR DE VITESSE -->
+    <!-- CALCULATEUR VITESSE -->
     <div class="card">
         <h2>🚀 Estimation Vitesse Max</h2>
         <div class="form-group">
@@ -215,104 +176,46 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="kv">KV Moteur (tr/min/V approx.) :</label>
+            <label for="kv">KV Moteur :</label>
             <input type="number" id="kv" value="30">
         </div>
         <button onclick="calculateSpeed()">Estimer la vitesse</button>
 
         <div class="result-box" id="speedResults" style="display:none;">
-            <div class="result-item"><span>Vitesse théorique à vide :</span><span class="result-value" id="resSpeedVoid">0 km/h</span></div>
-            <div class="result-item"><span>Vitesse estimée en charge :</span><span class="result-value" id="resSpeedReal">0 km/h</span></div>
+            <div class="result-item"><span>Vitesse théorique :</span><span class="result-value" id="resSpeedVoid">0 km/h</span></div>
+            <div class="result-item"><span>Vitesse réelle estimée :</span><span class="result-value" id="resSpeedReal">0 km/h</span></div>
         </div>
     </div>
 
     <script>
-        // FONCTION BLUETOOTH
-        async function connectBluetooth() {
-            const statusText = document.getElementById('btStatus');
-            const statusDot = document.getElementById('btDot');
-
-            if (!navigator.bluetooth) {
-                alert("Le Web Bluetooth n'est pas supporté sur ce navigateur. Utilise Google Chrome sur Android.");
-                return;
-            }
-
-            try {
-                statusText.innerText = "Recherche en cours...";
-                
-                // Recherche de tous les appareils Bluetooth LE à proximité
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['generic_access', 'e95d093b-251d-470a-a062-fa1922dfa9a8']
-                });
-
-                statusText.innerText = "Connexion à " + device.name + "...";
-                
-                const server = await device.gatt.connect();
-
-                // Mise à jour de l'interface si la connexion réussit
-                statusText.innerText = "Connecté";
-                statusDot.classList.add('online');
-
-                document.getElementById('btDeviceName').innerText = device.name || "Appareil sans nom";
-                document.getElementById('btDeviceId').innerText = device.id.substring(0, 10) + "...";
-                document.getElementById('btResults').style.display = 'block';
-
-                device.addEventListener('gattserverdisconnected', onDisconnected);
-
-            } catch (error) {
-                console.error("Erreur Bluetooth : ", error);
-                statusText.innerText = "Erreur / Annulé";
-                statusDot.classList.remove('online');
-            }
-        }
-
-        function onDisconnected(event) {
-            document.getElementById('btStatus').innerText = "Déconnecté";
-            document.getElementById('btDot').classList.remove('online');
-            alert("Trottinette / Appareil déconnecté.");
-        }
-
-        // CALCULATEUR BATTERIE
         function calculateBattery() {
             const s = parseFloat(document.getElementById('series').value) || 0;
             const p = parseFloat(document.getElementById('parallel').value) || 0;
             const cap = parseFloat(document.getElementById('cellCap').value) || 0;
 
-            const nominal = s * 3.6;
-            const max = s * 4.2;
-            const cutoff = s * 3.0;
-            const totalAh = (p * cap) / 1000;
-            const totalWh = nominal * totalAh;
-
-            document.getElementById('resNominal').innerText = nominal.toFixed(1) + ' V';
-            document.getElementById('resMax').innerText = max.toFixed(1) + ' V';
-            document.getElementById('resCutoff').innerText = cutoff.toFixed(1) + ' V';
-            document.getElementById('resCap').innerText = totalAh.toFixed(1) + ' Ah';
-            document.getElementById('resWh').innerText = totalWh.toFixed(0) + ' Wh';
+            document.getElementById('resNominal').innerText = (s * 3.6).toFixed(1) + ' V';
+            document.getElementById('resMax').innerText = (s * 4.2).toFixed(1) + ' V';
+            document.getElementById('resCutoff').innerText = (s * 3.0).toFixed(1) + ' V';
+            document.getElementById('resCap').innerText = ((p * cap) / 1000).toFixed(1) + ' Ah';
+            document.getElementById('resWh').innerText = (s * 3.6 * ((p * cap) / 1000)).toFixed(0) + ' Wh';
 
             document.getElementById('batResults').style.display = 'block';
         }
 
-        // CALCULATEUR VITESSE
         function calculateSpeed() {
             const v = parseFloat(document.getElementById('voltage').value) || 0;
             const wheel = parseFloat(document.getElementById('wheelSize').value) || 0;
             const kv = parseFloat(document.getElementById('kv').value) || 0;
 
             const rpm = v * kv;
-            const wheelCircumferenceMeters = (wheel * 0.0254) * Math.PI;
-            const speedMps = (rpm * wheelCircumferenceMeters) / 60;
-            const speedKmhVoid = speedMps * 3.6;
-            const speedKmhReal = speedKmhVoid * 0.82;
+            const speedKmhVoid = ((rpm * (wheel * 0.0254) * Math.PI) / 60) * 3.6;
 
             document.getElementById('resSpeedVoid').innerText = speedKmhVoid.toFixed(1) + ' km/h';
-            document.getElementById('resSpeedReal').innerText = speedKmhReal.toFixed(1) + ' km/h';
+            document.getElementById('resSpeedReal').innerText = (speedKmhVoid * 0.82).toFixed(1) + ' km/h';
 
             document.getElementById('speedResults').style.display = 'block';
         }
 
-        // SERVICE WORKER PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('SW register failed', err));
         }
