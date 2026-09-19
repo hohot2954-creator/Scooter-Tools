@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scooter Custom Utility</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d1117">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent: #238636;
+            --accent-hover: #2ea043;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border: #30363d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #58a6ff;
+        }
+
+        p.subtitle {
+            margin: 5px 0 0 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            color: #f0f6fc;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .result-box {
+            background-color: #0d1117;
+            border-left: 4px solid #58a6ff;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>⚡ Scooter Custom Utility</h1>
+        <p class="subtitle">Calculateurs & Réglages Configuration</p>
+    </header>
+
+    <!-- CALCULATEUR DE BATTERIE -->
+    <div class="card">
+        <h2>🔋 Analyse & Config Batterie</h2>
+        <div class="form-group">
+            <label for="series">Nombre de séries (S) :</label>
+            <input type="number" id="series" value="13" placeholder="ex: 13 for 48V, 16 for 60V">
+        </div>
+        <div class="form-group">
+            <label for="parallel">Nombre de parallèles (P) :</label>
+            <input type="number" id="parallel" value="4" placeholder="ex: 4">
+        </div>
+        <div class="form-group">
+            <label for="cellCap">Capacité d'une cellule (mAh) :</label>
+            <input type="number" id="cellCap" value="2500" placeholder="ex: 2500 ou 3000">
+        </div>
+        <button onclick="calculateBattery()">Calculer les specs batterie</button>
+
+        <div class="result-box" id="batResults" style="display:none;">
+            <div class="result-item"><span>Tension Nominale :</span><span class="result-value" id="resNominal">0 V</span></div>
+            <div class="result-item"><span>Tension Max (100%) :</span><span class="result-value" id="resMax">0 V</span></div>
+            <div class="result-item"><span>Coupure BMS (Cutoff) :</span><span class="result-value" id="resCutoff">0 V</span></div>
+            <div class="result-item"><span>Capacité Totale :</span><span class="result-value" id="resCap">0 Ah</span></div>
+            <div class="result-item"><span>Énergie Totale :</span><span class="result-value" id="resWh">0 Wh</span></div>
+        </div>
+    </div>
+
+    <!-- CALCULATEUR DE VITESSE -->
+    <div class="card">
+        <h2>🚀 Estimation Vitesse Max</h2>
+        <div class="form-group">
+            <label for="voltage">Tension Batterie (V) :</label>
+            <input type="number" id="voltage" value="52">
+        </div>
+        <div class="form-group">
+            <label for="wheelSize">Taille des roues (pouces) :</label>
+            <select id="wheelSize">
+                <option value="8.5">8.5 pouces</option>
+                <option value="10" selected>10 pouces</option>
+                <option value="11">11 pouces</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="kv">KV Moteur (tr/min/V approx.) :</label>
+            <input type="number" id="kv" value="30">
+        </div>
+        <button onclick="calculateSpeed()">Estimer la vitesse</button>
+
+        <div class="result-box" id="speedResults" style="display:none;">
+            <div class="result-item"><span>Vitesse théorique à vide :</span><span class="result-value" id="resSpeedVoid">0 km/h</span></div>
+            <div class="result-item"><span>Vitesse estimée en charge :</span><span class="result-value" id="resSpeedReal">0 km/h</span></div>
+        </div>
+    </div>
+
+    <!-- CONFIGURATEUR CONTRÔLEUR -->
+    <div class="card">
+        <h2>⚙️ Fiche Réglage Contrôleur</h2>
+        <div class="form-group">
+            <label for="maxCurrent">Courant Max Contrôleur (A) :</label>
+            <input type="number" id="maxCurrent" value="25">
+        </div>
+        <div class="form-group">
+            <label for="startMode">Démarrage :</label>
+            <select id="startMode">
+                <option value="Kick-start">Kick Start (Assistance au pied)</option>
+                <option value="Direct">Direct (Zero Start)</option>
+            </select>
+        </div>
+        <button onclick="saveConfig()">Sauvegarder la config</button>
+
+        <div class="result-box" id="configResults" style="display:none;">
+            <div class="result-item"><span>Puissance Max Estimée :</span><span class="result-value" id="resPower">0 W</span></div>
+            <div class="result-item"><span>Statut :</span><span class="result-value" style="color:#3fb950;">Profil enregistré localement</span></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateBattery() {
+            const s = parseFloat(document.getElementById('series').value) || 0;
+            const p = parseFloat(document.getElementById('parallel').value) || 0;
+            const cap = parseFloat(document.getElementById('cellCap').value) || 0;
+
+            const nominal = s * 3.6;
+            const max = s * 4.2;
+            const cutoff = s * 3.0;
+            const totalAh = (p * cap) / 1000;
+            const totalWh = nominal * totalAh;
+
+            document.getElementById('resNominal').innerText = nominal.toFixed(1) + ' V';
+            document.getElementById('resMax').innerText = max.toFixed(1) + ' V';
+            document.getElementById('resCutoff').innerText = cutoff.toFixed(1) + ' V';
+            document.getElementById('resCap').innerText = totalAh.toFixed(1) + ' Ah';
+            document.getElementById('resWh').innerText = totalWh.toFixed(0) + ' Wh';
+
+            document.getElementById('batResults').style.display = 'block';
+        }
+
+        function calculateSpeed() {
+            const v = parseFloat(document.getElementById('voltage').value) || 0;
+            const wheel = parseFloat(document.getElementById('wheelSize').value) || 0;
+            const kv = parseFloat(document.getElementById('kv').value) || 0;
+
+            const rpm = v * kv;
+            const wheelCircumferenceMeters = (wheel * 0.0254) * Math.PI;
+            const speedMps = (rpm * wheelCircumferenceMeters) / 60;
+            const speedKmhVoid = speedMps * 3.6;
+            const speedKmhReal = speedKmhVoid * 0.82; // Facteur de perte de charge ~18%
+
+            document.getElementById('resSpeedVoid').innerText = speedKmhVoid.toFixed(1) + ' km/h';
+            document.getElementById('resSpeedReal').innerText = speedKmhReal.toFixed(1) + ' km/h';
+
+            document.getElementById('speedResults').style.display = 'block';
+        }
+
+        function saveConfig() {
+            const v = parseFloat(document.getElementById('voltage').value) || 0;
+            const a = parseFloat(document.getElementById('maxCurrent').value) || 0;
+            const power = v * a;
+
+            document.getElementById('resPower').innerText = power + ' W';
+            document.getElementById('configResults').style.display = 'block';
+        }
+
+        // Service Worker pour la PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW register failed', err));
+        }
+    </script>
+</body>
+</html>
