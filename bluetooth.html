@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner & Connexion Bluetooth - Scooter Utility</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d1117">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent: #238636;
+            --blue: #58a6ff;
+            --red: #f85149;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border: #30363d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--blue);
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: var(--blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            color: #f0f6fc;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #1f6feb;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #388bfd;
+        }
+
+        button.btn-disconnect {
+            background-color: var(--red);
+        }
+
+        .status-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #0d1117;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            height: 12px;
+            width: 12px;
+            background-color: var(--red);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-dot.online {
+            background-color: #3fb950;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .data-card {
+            background-color: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .data-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .data-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--blue);
+            margin-top: 5px;
+        }
+
+        .log-box {
+            background-color: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #8b949e;
+            height: 100px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📶 Scanner Trottinette BLE</h1>
+        <a href="index.html" class="nav-link">← Retour aux calculateurs</a>
+    </header>
+
+    <div class="card">
+        <h2>État de la connexion</h2>
+        
+        <div class="status-box">
+            <div>
+                <span class="status-dot" id="dot"></span>
+                <span id="statusText">Non connecté</span>
+            </div>
+            <strong id="deviceName" style="color:var(--blue);">-</strong>
+        </div>
+
+        <button id="btnConnect" onclick="scanBluetooth()">🔍 Détecter & Connecter la trottinette</button>
+        <button id="btnDisconnect" class="btn-disconnect" onclick="disconnectBluetooth()" style="display:none;">Déconnecter</button>
+    </div>
+
+    <div class="card" id="dashboard" style="display:none;">
+        <h2>📊 Données en direct</h2>
+        
+        <div class="data-grid">
+            <div class="data-card">
+                <div class="data-title">Vitesse</div>
+                <div class="data-value" id="valSpeed">0.0 km/h</div>
+            </div>
+            <div class="data-card">
+                <div class="data-title">Batterie</div>
+                <div class="data-value" id="valBattery">-- %</div>
+            </div>
+            <div class="data-card">
+                <div class="data-title">Tension</div>
+                <div class="data-value" id="valVoltage">0.0 V</div>
+            </div>
+            <div class="data-card">
+                <div class="data-title">Signal BLE</div>
+                <div class="data-value" style="color:#3fb950;">OK</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📜 Journal d'activité (Console)</h2>
+        <div class="log-box" id="logs">
+            > Prêt à scanner les appareils Bluetooth...<br>
+        </div>
+    </div>
+
+    <script>
+        let bluetoothDevice = null;
+
+        function log(msg) {
+            const logsBox = document.getElementById('logs');
+            logsBox.innerHTML += "> " + msg + "<br>";
+            logsBox.scrollTop = logsBox.scrollHeight;
+        }
+
+        async function scanBluetooth() {
+            if (!navigator.bluetooth) {
+                alert("Le Bluetooth Web n'est pas supporté par ton navigateur. Utilise Google Chrome sur Android.");
+                log("ERREUR: Web Bluetooth non supporté.");
+                return;
+            }
+
+            try {
+                log("Recherche des appareils Bluetooth à proximité...");
+                document.getElementById('statusText').innerText = "Recherche...";
+
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [
+                        'generic_access',
+                        '0000180f-0000-1000-8000-00805f9b34fb', // Service Batterie standard
+                        'e95d093b-251d-470a-a062-fa1922dfa9a8'  // Service Trottinette Custom
+                    ]
+                });
+
+                log("Appareil trouvé : " + bluetoothDevice.name);
+                document.getElementById('deviceName').innerText = bluetoothDevice.name || "Trottinette sans nom";
+                document.getElementById('statusText').innerText = "Connexion en cours...";
+
+                const server = await bluetoothDevice.gatt.connect();
+                log("Connecté au serveur GATT avec succès !");
+
+                // Mise à jour de l'affichage
+                document.getElementById('dot').classList.add('online');
+                document.getElementById('statusText').innerText = "Connecté";
+                document.getElementById('btnConnect').style.display = 'none';
+                document.getElementById('btnDisconnect').style.display = 'block';
+                document.getElementById('dashboard').style.display = 'block';
+
+                bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+            } catch (error) {
+                log("Erreur ou annulation : " + error.message);
+                document.getElementById('statusText').innerText = "Échec connexion";
+                document.getElementById('dot').classList.remove('online');
+            }
+        }
+
+        function disconnectBluetooth() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+                log("Déconnexion manuelle effectuée.");
+            }
+        }
+
+        function onDisconnected() {
+            log("Appareil déconnecté.");
+            document.getElementById('dot').classList.remove('online');
+            document.getElementById('statusText').innerText = "Déconnecté";
+            document.getElementById('deviceName').innerText = "-";
+            document.getElementById('btnConnect').style.display = 'block';
+            document.getElementById('btnDisconnect').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
